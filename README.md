@@ -1,8 +1,12 @@
 # DJ Music Downloader Skill
 
-A universal, cross-platform (**Windows & macOS**) AI agent skill for DJs. Give any AI a **Spotify**, **Apple Music**, **SoundCloud**, **YouTube**, **Bandcamp**, or **Mixcloud** link, a **plain-text tracklist**, or **screenshots of songs**, and it downloads, verifies durations and artwork, and exports **Rekordbox- and CDJ-ready 320 kbps MP3s** with clean **ID3v2.3 tags** and **square cover art**.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-blue.svg)](https://agentskills.io)
+[![Platforms](https://img.shields.io/badge/OS-Windows%20%7C%20macOS-lightgrey.svg)](#cli-usage-scriptsdj_dlpy)
 
-Works across **Claude**, **ChatGPT / Codex**, **Gemini / Antigravity**, **Cursor**, **GitHub Copilot**, and any agent supporting the open [Agent Skills](https://agentskills.io) format.
+A universal, cross-platform (**Windows & macOS**) AI agent skill for DJs. Give any AI a **Spotify**, **Apple Music**, **SoundCloud**, **YouTube**, **Bandcamp**, or **Mixcloud** link, a **plain-text tracklist**, or **screenshots of songs**, and it extracts metadata, verifies durations and cover art, and prepares **320 kbps MP3s** with clean **ID3v2.3 tags** and **square artwork** for **Rekordbox**, **Serato**, **Traktor**, **Engine DJ**, **VirtualDJ**, and **Pioneer CDJ/XDJ/DDJ** hardware.
+
+Works across **Claude**, **ChatGPT / Codex**, **Gemini / Antigravity**, **Cursor**, **GitHub Copilot**, and any agent supporting the open [Agent Skills](https://agentskills.io) standard.
 
 ---
 
@@ -70,3 +74,13 @@ python .agents/skills/dj-music-downloader/scripts/dj_dl.py download -i tracks.js
 # 4. Read-only audit of an existing DJ folder (add --fix-ext / --convert-wav after confirming)
 python .agents/skills/dj-music-downloader/scripts/dj_dl.py audit "/path/to/DJ Folder"
 ```
+
+---
+
+## Legal Disclaimer & License
+
+This repository provides **code and AI workflow instructions only**—it does **not** host, distribute, or bundle copyrighted audio files, `ffmpeg` binaries, or DRM circumvention tools.
+
+* Intended for **personal archival, royalty-free / Creative Commons tracks, promotional free DJ edits/bootlegs, and media you have the legal right to download and use**.
+* Users are solely responsible for complying with applicable copyright laws and the Terms of Service of any third-party platform.
+* Released under the [MIT License](./LICENSE) (`"AS IS"`, without warranty or liability). Note that runtime dependencies (`yt-dlp`, `mutagen`, `requests`, and optionally `imageio-ffmpeg`) are installed separately by the user under their own respective licenses.
