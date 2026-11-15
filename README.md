@@ -4,8 +4,6 @@ A universal, cross-platform (**Windows & macOS**) AI agent skill for DJs. Give a
 
 Works across **Claude**, **ChatGPT / Codex**, **Gemini / Antigravity**, **Cursor**, **GitHub Copilot**, and any agent supporting the open [Agent Skills](https://agentskills.io) format.
 
-*(Companion standalone desktop app specification/project: [DeckPrep](https://github.com/byohros6/DeckPrep).)*
-
 ---
 
 ## Install
