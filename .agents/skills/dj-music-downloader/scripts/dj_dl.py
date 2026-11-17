@@ -290,75 +290,87 @@ def _score_meta_hit(
     return score
 
 
+def _artist_queries(artist: str) -> list[str]:
+    """Return full artist string followed by primary artist fallback if multi-artist."""
+    primary = re.split(r"[,&]|\b(?:feat\.?|ft\.?|x)\b", artist, flags=re.IGNORECASE)[0].strip()
+    return [artist] if (not primary or primary == artist) else [artist, primary]
+
+
 def fetch_deezer_meta(artist: str, title: str, target_dur: int | None = None) -> dict[str, Any]:
     import requests
 
-    pace_api()
-    try:
-        resp = requests.get(
-            "https://api.deezer.com/search",
-            params={"q": f"{artist} {title}", "limit": 5},
-            timeout=6,
-        )
-        if resp.status_code != 200:
-            return {}
-        best: tuple[float, dict[str, Any]] = (-1.0, {})
-        for hit in resp.json().get("data") or []:
-            h_artist = (hit.get("artist") or {}).get("name", "")
-            h_title = hit.get("title", "")
-            h_dur = hit.get("duration")
-            sc = _score_meta_hit(artist, title, target_dur, h_artist, h_title, h_dur)
-            if sc > best[0]:
-                album = hit.get("album") or {}
-                best = (
-                    sc,
-                    {
-                        "album": album.get("title"),
-                        "art_url": album.get("cover_xl") or album.get("cover_big"),
-                        "score": sc,
-                    },
-                )
-        return best[1] if best[0] >= 1.8 else {}
-    except Exception:
-        return {}
+    for query_artist in _artist_queries(artist):
+        pace_api()
+        try:
+            resp = requests.get(
+                "https://api.deezer.com/search",
+                params={"q": f"{query_artist} {title}", "limit": 5},
+                timeout=6,
+            )
+            if resp.status_code != 200:
+                continue
+            best: tuple[float, dict[str, Any]] = (-1.0, {})
+            for hit in resp.json().get("data") or []:
+                h_artist = (hit.get("artist") or {}).get("name", "")
+                h_title = hit.get("title", "")
+                h_dur = hit.get("duration")
+                sc = _score_meta_hit(query_artist, title, target_dur, h_artist, h_title, h_dur)
+                if sc > best[0]:
+                    album = hit.get("album") or {}
+                    best = (
+                        sc,
+                        {
+                            "album": album.get("title"),
+                            "art_url": album.get("cover_xl") or album.get("cover_big"),
+                            "score": sc,
+                        },
+                    )
+            if best[0] >= 1.8:
+                return best[1]
+        except Exception:
+            continue
+    return {}
 
 
 def fetch_itunes_meta(artist: str, title: str, target_dur: int | None = None) -> dict[str, Any]:
     import requests
 
-    pace_api()
-    try:
-        resp = requests.get(
-            "https://itunes.apple.com/search",
-            params={"term": f"{artist} {title}", "entity": "song", "limit": 5},
-            headers={"User-Agent": USER_AGENT},
-            timeout=6,
-        )
-        if resp.status_code != 200:
-            return {}
-        best: tuple[float, dict[str, Any]] = (-1.0, {})
-        for hit in resp.json().get("results") or []:
-            h_artist = hit.get("artistName", "")
-            h_title = hit.get("trackName", "")
-            dur_ms = hit.get("trackTimeMillis") or 0
-            h_dur = round(dur_ms / 1000) if dur_ms else None
-            sc = _score_meta_hit(artist, title, target_dur, h_artist, h_title, h_dur)
-            if sc > best[0]:
-                art = hit.get("artworkUrl100", "").replace("100x100bb", "1000x1000bb")
-                rel = hit.get("releaseDate", "")
-                best = (
-                    sc,
-                    {
-                        "album": hit.get("collectionName"),
-                        "genre": hit.get("primaryGenreName"),
-                        "year": rel[:4] if len(rel) >= 4 else None,
-                        "art_url": art or None,
-                        "score": sc,
-                    },
-                )
-        return best[1] if best[0] >= 1.8 else {}
-    except Exception:
-        return {}
+    for query_artist in _artist_queries(artist):
+        pace_api()
+        try:
+            resp = requests.get(
+                "https://itunes.apple.com/search",
+                params={"term": f"{query_artist} {title}", "entity": "song", "limit": 5},
+                headers={"User-Agent": USER_AGENT},
+                timeout=6,
+            )
+            if resp.status_code != 200:
+                continue
+            best: tuple[float, dict[str, Any]] = (-1.0, {})
+            for hit in resp.json().get("results") or []:
+                h_artist = hit.get("artistName", "")
+                h_title = hit.get("trackName", "")
+                dur_ms = hit.get("trackTimeMillis") or 0
+                h_dur = round(dur_ms / 1000) if dur_ms else None
+                sc = _score_meta_hit(query_artist, title, target_dur, h_artist, h_title, h_dur)
+                if sc > best[0]:
+                    art = hit.get("artworkUrl100", "").replace("100x100bb", "1000x1000bb")
+                    rel = hit.get("releaseDate", "")
+                    best = (
+                        sc,
+                        {
+                            "album": hit.get("collectionName"),
+                            "genre": hit.get("primaryGenreName"),
+                            "year": rel[:4] if len(rel) >= 4 else None,
+                            "art_url": art or None,
+                            "score": sc,
+                        },
+                    )
+            if best[0] >= 1.8:
+                return best[1]
+        except Exception:
+            continue
+    return {}
 
 
 def download_bytes(url: str) -> bytes | None:
