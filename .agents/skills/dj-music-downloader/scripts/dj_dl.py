@@ -467,8 +467,14 @@ def _extract_spotify(url: str) -> tuple[str, list[dict[str, Any]]]:
     raw_tracks = entity.get("trackList") or ([] if kind != "track" else [entity])
     tracks = []
     for item in raw_tracks:
-        title = (item.get("title") or "").replace("\u00a0", " ").strip()
+        title = (item.get("title") or item.get("name") or "").replace("\u00a0", " ").strip()
         artist = (item.get("subtitle") or "").replace("\u00a0", " ").strip()
+        if not artist and isinstance(item.get("artists"), list):
+            artist = ", ".join(
+                (a.get("name") or "").strip()
+                for a in item["artists"]
+                if isinstance(a, dict) and a.get("name")
+            )
         dur_ms = item.get("duration") or 0
         if title and artist:
             entry: dict[str, Any] = {"artist": artist, "title": title}
